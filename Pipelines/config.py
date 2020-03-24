@@ -1,0 +1,1 @@
+path = "/Users/azizbenmosbah/PycharmProjects/nlp-getting-started/Data/train.csv"
