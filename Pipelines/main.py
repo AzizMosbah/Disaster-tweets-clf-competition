@@ -1,13 +1,16 @@
 from Pipelines.config import path
-from Pipelines.process_raw import process, replace_index, replace_keyword_nans
+from Pipelines.process_raw import process, replace_keyword_nans
+from Pipelines.transformations import tf_idf_table
 
 
-def run_pipeline(file: str):
+def tfidf_pipeline(file: str, p: int = 600):
     processed_df = (
-        process(file).pipe(replace_index).pipe(replace_keyword_nans)
+        process(file)
+        .pipe(replace_keyword_nans)
+        .pipe(tf_idf_table, feature_number= p, words='english')
     )
-    return df
+    return processed_df
 
 
 if __name__ == "__main__":
-    run_pipeline(path)
+    tfidf_pipeline(path)
