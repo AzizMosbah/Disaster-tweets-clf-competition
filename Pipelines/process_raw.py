@@ -6,8 +6,9 @@ def process(path: str) -> pd.DataFrame():
     :param path:
     :return:
     """
-
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+    df['text_original'] = df['text']
+    return df
 
 def replace_keyword_nans(df: pd.DataFrame()) -> pd.DataFrame():
 
