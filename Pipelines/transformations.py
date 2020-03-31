@@ -1,5 +1,9 @@
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import (
+    TfidfVectorizer,
+    HashingVectorizer,
+    CountVectorizer,
+)
 from sklearn.model_selection import train_test_split
 
 from nltk.stem.snowball import SnowballStemmer
@@ -7,8 +11,6 @@ from nltk.stem.snowball import SnowballStemmer
 # Because the data frame is very small I input it as a whole instead of inputting just the series column
 # For production code this might be quite important as not only does it ease testing but also best for memory
 # This is an analysis code so it has to be pleasing to the eyes as well.
-
-
 
 
 def remove_urls(df: pd.DataFrame):
@@ -49,6 +51,19 @@ def remove_punctuations(df: pd.DataFrame):
     return df
 
 
+def nltk_stemmer(df: pd.DataFrame):
+    """
+
+    :param df:
+    :return:
+    """
+    stemmer = SnowballStemmer("english")
+    df.text = df.text.str.split()
+    df.text = df.text.apply(lambda x: [stemmer.stem(y) for y in x])
+    df.text = df.text.apply(lambda x: " ".join(x))
+    return df
+
+
 def vector_transformer(df: pd.DataFrame, vec):
     """
 
@@ -62,31 +77,31 @@ def vector_transformer(df: pd.DataFrame, vec):
 
 
 def tf_idf_table(
-    tweets: pd.DataFrame, feature_number: int, words: str = None, type: str = "tfidf"
+    tweets: pd.DataFrame, feature_number: int, words: str = None, vec: str = "tfidf"
 ):
     """
 
     :param tweets:
     :param feature_number:
     :param words:
+    :param vec:
     :return:
     """
-
     tweets = tweets.sample(frac=1, random_state=123)
-    X = tweets.loc[:, tweets.columns[:-1]]
     y = tweets["target"]
+    X = tweets.loc[:, tweets.columns != "target"]
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=int(0.2 * len(X)), random_state=42
     )
-    if type == "tfidf":
+    if vec == "tfidf":
         tvec = TfidfVectorizer(
             stop_words=words, max_features=feature_number, analyzer="word"
         )
-    elif type == "count":
+    elif vec == "count":
         tvec = CountVectorizer(
             stop_words=words, max_features=feature_number, analyzer="word"
         )
-    elif type == "hash":
+    elif vec == "hash":
         tvec = HashingVectorizer(
             stop_words=words, max_features=feature_number, analyzer="word"
         )
@@ -101,8 +116,9 @@ def tf_idf_table(
     )
 
     train_tf_idf = vector_transformer(X_train, tvec)
+    train_tf_idf = train_tf_idf.rename(columns={"id": "ids"})
     test_tf_idf = vector_transformer(X_test, tvec)
-
+    test_tf_idf = test_tf_idf.rename(columns={"id": "ids"})
     X_train, X_test = X_train.join(train_tf_idf), X_test.join(test_tf_idf)
 
     return X_train, X_test, y_train, y_test

@@ -11,9 +11,7 @@ def process(path: str) -> pd.DataFrame():
     return df
 
 def replace_keyword_nans(df: pd.DataFrame()) -> pd.DataFrame():
-
     """
-
     :param df:
     :return:
     """

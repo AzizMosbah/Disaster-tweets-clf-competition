@@ -1,6 +1,6 @@
 from Pipelines.config import path
 from Pipelines.process_raw import process, replace_keyword_nans
-from Pipelines.transformations import tf_idf_table, remove_urls
+from Pipelines.transformations import tf_idf_table, remove_urls, remove_emojis, remove_punctuations, nltk_stemmer
 
 
 def tfidf_pipeline(file: str, p: int = 600):
@@ -8,6 +8,9 @@ def tfidf_pipeline(file: str, p: int = 600):
         process(file)
         .pipe(replace_keyword_nans)
         .pipe(remove_urls)
+        .pipe(remove_emojis)
+        .pipe(remove_punctuations)
+        .pipe(nltk_stemmer)
         .pipe(tf_idf_table, feature_number= p, words='english')
     )
     return processed_df
