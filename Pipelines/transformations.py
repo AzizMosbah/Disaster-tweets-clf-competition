@@ -72,7 +72,8 @@ def vector_transformer(df: pd.DataFrame, vec):
     :return:
     """
     df = pd.DataFrame(vec.transform(df.text).todense())
-    df.columns = vec.get_feature_names()
+    if not isinstance(vec, HashingVectorizer):
+        df.columns = vec.get_feature_names()
     return df
 
 
@@ -103,7 +104,7 @@ def tf_idf_table(
         )
     elif vec == "hash":
         tvec = HashingVectorizer(
-            stop_words=words, max_features=feature_number, analyzer="word"
+            stop_words=words, n_features=feature_number, analyzer="word"
         )
 
     tvec.fit(X_train.text)
